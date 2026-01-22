@@ -1,17 +1,37 @@
 import os
-from werkzeug.utils import secure_filename
-from uuid import uuid4
-from flask import current_app
+import uuid
+from supabase import create_client
+
+# Create Supabase client (once)
+supabase = create_client(
+    os.getenv("SUPABASE_URL"),
+    os.getenv("SUPABASE_SERVICE_KEY")
+)
+
+BUCKET_NAME = "audio"
 
 def upload_to_storage(file):
-    filename = secure_filename(file.filename)
-    unique_name = f"{uuid4()}_{filename}"
+    """
+    Upload audio file to Supabase Storage
+    Returns public audio URL
+    """
 
-    # uploads/audio/
-    upload_dir = os.path.join(current_app.static_folder, "audio")
-    os.makedirs(upload_dir, exist_ok=True)
+    # generate unique filename
+    filename = f"{uuid.uuid4()}_{file.filename}"
 
-    file_path = os.path.join(upload_dir, unique_name)
-    file.save(file_path)
+    # upload file to Supabase Storage
+    supabase.storage.from_(BUCKET_NAME).upload(
+        filename,
+        file.read(),
+        {
+            "content-type": file.content_type
+        }
+    )
 
-    return f"/static/audio/{unique_name}"
+    # generate public URL
+    audio_url = (
+        f"{os.getenv('SUPABASE_URL')}"
+        f"/storage/v1/object/public/{BUCKET_NAME}/{filename}"
+    )
+
+    return audio_url
