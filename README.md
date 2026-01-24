@@ -241,7 +241,7 @@ Main player UI (play/pause, current track).
 MiniPlayer.jsx
 
 <p align="center">
-  <img src="screenshots\Screenshot 2026-01-23 183005.png" width="60%" />
+  <img src="screenshots\Screenshot 2026-01-23 182724.png" width="60%" />
 </p>
 
 Compact player visible across pages.
@@ -293,8 +293,8 @@ Displays playlist tracks
 Allows add/remove
 
 <p align="center">
-  <img src="screenshots\Screenshot 2026-01-23 182759.png" width="45%" />
-  <img src="screenshots\Screenshot 2026-01-23 183005.png" width="45%" />
+  <img src="screenshots\Screenshot 2026-01-23 182347.png" width="45%" />
+  <img src="screenshots\Screenshot 2026-01-23 182407.png" width="45%" />
 </p>
 
 RecentlyPlayed.jsx
@@ -303,7 +303,7 @@ Shows playback history
 Enables resume
 
 <p align="center">
-  <img src="screenshots\Screenshot 2026-01-23 183005.png" width="60%" />
+  <img src="screenshots\Screenshot 2026-01-23 182522.png" width="60%" />
 </p>
 
 🎨 Styling
