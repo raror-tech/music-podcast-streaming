@@ -1,11 +1,12 @@
 import { useEffect, useState, useCallback } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { usePlayer } from "../context/PlayerContext";
 import api from "../services/api";
 import Layout from "../components/Layout";
 
 export default function PlaylistDetail() {
   const { id } = useParams();
+  const navigate = useNavigate();
   const { playTrack } = usePlayer();
 
   const [playlist, setPlaylist] = useState(null);
@@ -37,11 +38,9 @@ export default function PlaylistDetail() {
     }
   };
 
-  // ➕ ADD SONGS FLOW
+  // ➕ ADD SONGS → SEARCH PAGE
   const goToAddSongs = () => {
-    // remember which playlist is active
-    localStorage.setItem("activePlaylistId", id);
-    window.location.href = "/music";
+    navigate(`/music?playlistId=${id}`);
   };
 
   if (loading) {
@@ -84,19 +83,12 @@ export default function PlaylistDetail() {
               key={track.id}
               className="flex justify-between items-center bg-gray-800 p-3 rounded"
             >
-              {/* 🎶 INFO */}
               <div>
-                <p className="text-white font-medium">
-                  {track.title}
-                </p>
-                <p className="text-gray-400 text-sm">
-                  {track.artist}
-                </p>
+                <p className="text-white font-medium">{track.title}</p>
+                <p className="text-gray-400 text-sm">{track.artist}</p>
               </div>
 
-              {/* 🎛 ACTIONS */}
               <div className="flex gap-3">
-                {/* ▶ PLAY */}
                 <button
                   onClick={() => playTrack(track)}
                   className="px-3 py-1 bg-green-600 rounded hover:bg-green-500 text-sm"
@@ -104,7 +96,6 @@ export default function PlaylistDetail() {
                   ▶ Play
                 </button>
 
-                {/* ❌ REMOVE */}
                 <button
                   onClick={() => removeTrack(track.id)}
                   className="px-3 py-1 bg-red-600 rounded hover:bg-red-500 text-sm"

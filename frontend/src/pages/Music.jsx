@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { usePlayer } from "../context/PlayerContext";
+import { useSearchParams } from "react-router-dom";
 import api from "../services/api";
 import Layout from "../components/Layout";
 
@@ -10,16 +11,18 @@ export default function Music() {
   const [error, setError] = useState("");
 
   const { playTrack } = usePlayer();
+  const [searchParams] = useSearchParams();
+  const playlistIdFromUrl = searchParams.get("playlistId");
 
   // 🔄 FETCH MUSIC / SEARCH
   useEffect(() => {
     setLoading(true);
     setError("");
 
-    const delay = query ? 500 : 0;
+    const delay = query.trim() ? 500 : 0;
 
     const timer = setTimeout(() => {
-      const request = query
+      const request = query.trim()
         ? api.get(`/music/search?q=${query}`)
         : api.get("/music");
 
@@ -39,9 +42,13 @@ export default function Music() {
 
   // ➕ ADD TRACK TO PLAYLIST
   const addToPlaylist = async (e, trackId) => {
-    e.stopPropagation(); // ⛔ prevent play on button click
+    e.stopPropagation();
 
-    const playlistId = prompt("Enter Playlist ID");
+    let playlistId = playlistIdFromUrl;
+
+    if (!playlistId) {
+      playlistId = prompt("Enter Playlist ID");
+    }
 
     if (!playlistId) return;
 
@@ -58,9 +65,10 @@ export default function Music() {
   return (
     <Layout>
       <div className="p-6">
-        <h1 className="text-2xl font-bold text-white mb-4">Music</h1>
+        <h1 className="text-2xl font-bold text-white mb-4">
+          {playlistIdFromUrl ? "Add Songs to Playlist" : "Search Music"}
+        </h1>
 
-        {/* 🔍 SEARCH BAR */}
         <input
           type="text"
           placeholder="Search songs or artists..."
@@ -76,14 +84,12 @@ export default function Music() {
           <p className="text-gray-400">No songs found</p>
         )}
 
-        {/* 🎵 TRACK LIST */}
         <div className="grid gap-4">
           {tracks.map((track) => (
             <div
               key={track.id}
               className="bg-gray-800 p-4 rounded flex justify-between items-center hover:bg-gray-700 transition"
             >
-              {/* 🎶 TRACK INFO */}
               <div>
                 <h3 className="text-white font-semibold">{track.title}</h3>
                 <p className="text-gray-400">
@@ -91,9 +97,7 @@ export default function Music() {
                 </p>
               </div>
 
-              {/* 🎛 ACTIONS */}
               <div className="flex gap-3">
-                {/* ▶ PLAY */}
                 <button
                   onClick={() => playTrack(track)}
                   className="px-3 py-1 bg-green-600 rounded hover:bg-green-500 text-sm"
@@ -101,7 +105,6 @@ export default function Music() {
                   ▶ Play
                 </button>
 
-                {/* ➕ ADD TO PLAYLIST */}
                 <button
                   onClick={(e) => addToPlaylist(e, track.id)}
                   className="px-3 py-1 bg-blue-600 rounded hover:bg-blue-500 text-sm"

@@ -1,23 +1,16 @@
 from flask import Blueprint, jsonify, request
 from flask_jwt_extended import jwt_required
-
 from app.models.track import Track
-from app.services.musicbrainz_service import search_tracks
 
-# Blueprint with prefix
 music_bp = Blueprint("music", __name__, url_prefix="/api/music")
 
 
 # --------------------------------------------------
-# ✅ DEFAULT MUSIC LIST (SPOTIFY-LIKE HOME VIEW)
+# 🎵 GET ALL MUSIC (FROM DB)
 # --------------------------------------------------
 @music_bp.route("", methods=["GET"])
 @jwt_required()
 def get_all_music():
-    """
-    Called when user opens /music page
-    Shows all tracks stored in your database
-    """
     tracks = Track.query.all()
 
     return jsonify([
@@ -33,31 +26,28 @@ def get_all_music():
 
 
 # --------------------------------------------------
-# 🔍 SEARCH MUSIC (MusicBrainz)
+# 🔍 SEARCH MUSIC (DB SEARCH – FIXED)
 # --------------------------------------------------
 @music_bp.route("/search", methods=["GET"])
 @jwt_required()
 def search_music():
-    """
-    Called when user types in search box
-    Fetches results from MusicBrainz
-    """
     q = request.args.get("q")
 
     if not q:
         return jsonify([])
 
-    data = search_tracks(q)
+    tracks = Track.query.filter(
+        Track.title.ilike(f"%{q}%") |
+        Track.artist.ilike(f"%{q}%")
+    ).all()
 
-    results = []
-    for item in data.get("recordings", []):
-        results.append({
-            "title": item.get("title"),
-            "artist": (
-                item["artist-credit"][0]["name"]
-                if item.get("artist-credit")
-                else None
-            )
-        })
-
-    return jsonify(results)
+    return jsonify([
+        {
+            "id": t.id,
+            "title": t.title,
+            "artist": t.artist,
+            "category": t.category,
+            "audio_url": t.audio_url
+        }
+        for t in tracks
+    ])
