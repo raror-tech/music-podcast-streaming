@@ -1,6 +1,4 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { useState, useEffect } from "react";
-
 import { PlayerProvider } from "./context/PlayerContext";
 import MiniPlayer from "./components/MiniPlayer";
 
@@ -11,66 +9,77 @@ import Playlists from "./pages/Playlists";
 import PlaylistDetail from "./pages/PlaylistDetail";
 import RecentlyPlayed from "./pages/RecentlyPlayed";
 
+// 🔐 simple auth check
+const isAuthenticated = () => {
+  return !!localStorage.getItem("token");
+};
+
 function App() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-
-  // 🔐 Check login on load + when token changes
-  useEffect(() => {
-    const checkAuth = () => {
-      setIsLoggedIn(!!localStorage.getItem("token"));
-    };
-
-    checkAuth();
-    window.addEventListener("storage", checkAuth);
-
-    return () => window.removeEventListener("storage", checkAuth);
-  }, []);
-
   return (
     <PlayerProvider>
       <BrowserRouter>
-        {/* padding-bottom so content doesn't hide behind mini player */}
         <div className="min-h-screen bg-black text-white pb-24">
           <Routes>
-            {/* 🔑 LOGIN */}
-            <Route path="/login" element={<Login />} />
+            {/* LOGIN */}
+            <Route
+              path="/login"
+              element={
+                isAuthenticated() ? <Navigate to="/" /> : <Login />
+              }
+            />
 
-            {/* 🏠 HOME */}
+            {/* HOME */}
             <Route
               path="/"
-              element={isLoggedIn ? <Home /> : <Navigate to="/login" />}
+              element={
+                isAuthenticated() ? <Home /> : <Navigate to="/login" />
+              }
             />
 
-            {/* 🔍 SEARCH */}
+            {/* SEARCH */}
             <Route
               path="/search"
-              element={isLoggedIn ? <Search /> : <Navigate to="/login" />}
+              element={
+                isAuthenticated() ? <Search /> : <Navigate to="/login" />
+              }
             />
 
-            {/* 📂 PLAYLISTS */}
+            {/* PLAYLISTS */}
             <Route
               path="/playlists"
-              element={isLoggedIn ? <Playlists /> : <Navigate to="/login" />}
+              element={
+                isAuthenticated() ? <Playlists /> : <Navigate to="/login" />
+              }
             />
             <Route
               path="/playlists/:id"
               element={
-                isLoggedIn ? <PlaylistDetail /> : <Navigate to="/login" />
+                isAuthenticated() ? (
+                  <PlaylistDetail />
+                ) : (
+                  <Navigate to="/login" />
+                )
               }
             />
 
-            {/* 🕘 RECENT */}
+            {/* RECENT */}
             <Route
               path="/recent"
-              element={isLoggedIn ? <RecentlyPlayed /> : <Navigate to="/login" />}
+              element={
+                isAuthenticated() ? (
+                  <RecentlyPlayed />
+                ) : (
+                  <Navigate to="/login" />
+                )
+              }
             />
 
-            {/* ❓ FALLBACK */}
+            {/* FALLBACK */}
             <Route path="*" element={<Navigate to="/" />} />
           </Routes>
 
-          {/* 🎧 GLOBAL MINI PLAYER */}
-          <MiniPlayer />
+          {/* GLOBAL PLAYER */}
+          {isAuthenticated() && <MiniPlayer />}
         </div>
       </BrowserRouter>
     </PlayerProvider>
