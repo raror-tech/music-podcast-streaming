@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import api from "../services/api";
 import { Link } from "react-router-dom";
+import Layout from "../components/Layout";
 
 export default function Playlists() {
     const [playlists, setPlaylists] = useState([]);
@@ -16,7 +17,7 @@ export default function Playlists() {
     };
 
     const createPlaylist = async () => {
-        if (!name) return alert("Enter playlist name");
+        if (!name.trim()) return alert("Enter playlist name");
 
         await api.post("/playlists", { name });
         setName("");
@@ -24,35 +25,37 @@ export default function Playlists() {
     };
 
     return (
+        <Layout>
         <div className="p-6">
-        <h1 className="text-xl font-bold mb-4">My Playlists</h1>
+            <h1 className="text-2xl font-bold mb-4">My Playlists</h1>
 
-        {/* Create Playlist */}
-        <div className="flex gap-2 mb-4">
+            {/* ➕ CREATE PLAYLIST */}
+            <div className="flex gap-2 mb-6">
             <input
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder="Playlist name"
-            className="border p-2 rounded"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="Playlist name"
+                className="p-2 rounded bg-gray-800 text-white"
             />
             <button
-            onClick={createPlaylist}
-            className="bg-black text-white px-4 rounded"
+                onClick={createPlaylist}
+                className="bg-green-500 text-black px-4 rounded"
             >
-            Create
+                Create
             </button>
-        </div>
+            </div>
 
-        {/* List */}
-        {playlists.map((p) => (
+            {/* 📂 PLAYLIST LIST */}
+            {playlists.map((p) => (
             <Link
-            key={p.id}
-            to={`/playlists/${p.id}`}
-            className="block p-3 border mb-2 rounded hover:bg-gray-100"
+                key={p.id}
+                to={`/playlists/${p.id}`}
+                className="block bg-gray-800 p-3 mb-2 rounded hover:bg-gray-700"
             >
-            {p.name}
+                {p.name}
             </Link>
-        ))}
+            ))}
         </div>
+        </Layout>
     );
 }
