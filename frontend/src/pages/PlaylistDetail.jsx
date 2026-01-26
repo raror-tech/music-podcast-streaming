@@ -11,7 +11,7 @@ export default function PlaylistDetail() {
   const [playlist, setPlaylist] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // 📂 FETCH PLAYLIST (memoized to satisfy ESLint)
+  // 📂 FETCH PLAYLIST
   const fetchPlaylist = useCallback(async () => {
     try {
       const res = await api.get(`/playlists/${id}`);
@@ -31,10 +31,17 @@ export default function PlaylistDetail() {
   const removeTrack = async (trackId) => {
     try {
       await api.delete(`/playlists/${id}/tracks/${trackId}`);
-      fetchPlaylist(); // refresh list
+      fetchPlaylist();
     } catch {
       alert("Failed to remove track");
     }
+  };
+
+  // ➕ ADD SONGS FLOW
+  const goToAddSongs = () => {
+    // remember which playlist is active
+    localStorage.setItem("activePlaylistId", id);
+    window.location.href = "/music";
   };
 
   if (loading) {
@@ -50,9 +57,19 @@ export default function PlaylistDetail() {
   return (
     <Layout>
       <div className="p-6">
-        <h1 className="text-2xl font-bold text-white mb-4">
-          {playlist.name}
-        </h1>
+        {/* HEADER */}
+        <div className="flex justify-between items-center mb-4">
+          <h1 className="text-2xl font-bold text-white">
+            {playlist.name}
+          </h1>
+
+          <button
+            onClick={goToAddSongs}
+            className="px-4 py-2 bg-blue-600 hover:bg-blue-500 rounded text-sm"
+          >
+            ➕ Add Songs
+          </button>
+        </div>
 
         {playlist.tracks.length === 0 && (
           <p className="text-gray-400">
