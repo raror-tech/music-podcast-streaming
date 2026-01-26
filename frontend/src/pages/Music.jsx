@@ -36,6 +36,24 @@ export default function Music() {
         return () => clearTimeout(timer);
     }, [query]);
 
+    // ✅ ADD TRACK TO PLAYLIST
+    const addToPlaylist = async (e, trackId) => {
+        e.stopPropagation(); // ⛔ prevent play on button click
+
+        const playlistId = prompt("Enter Playlist ID");
+
+        if (!playlistId) return;
+
+        try {
+        await api.post(`/playlists/${playlistId}/tracks`, {
+            track_id: trackId,
+        });
+        alert("Added to playlist ✅");
+        } catch {
+        alert("Failed to add to playlist ❌");
+        }
+    };
+
     return (
         <Layout>
         <div className="p-6">
@@ -62,14 +80,25 @@ export default function Music() {
                 <div
                 key={track.id}
                 onClick={() => playTrack(track)}
-                className="bg-gray-800 p-4 rounded cursor-pointer hover:bg-gray-700 transition"
+                className="bg-gray-800 p-4 rounded cursor-pointer hover:bg-gray-700 transition flex justify-between items-center"
                 >
-                <h3 className="text-white font-semibold">
+                {/* 🎵 TRACK INFO */}
+                <div>
+                    <h3 className="text-white font-semibold">
                     {track.title}
-                </h3>
-                <p className="text-gray-400">
+                    </h3>
+                    <p className="text-gray-400">
                     {track.artist || "Unknown Artist"}
-                </p>
+                    </p>
+                </div>
+
+                {/* ➕ ADD TO PLAYLIST */}
+                <button
+                    onClick={(e) => addToPlaylist(e, track.id)}
+                    className="text-sm text-green-400 hover:text-green-300"
+                >
+                    ➕ Add
+                </button>
                 </div>
             ))}
             </div>

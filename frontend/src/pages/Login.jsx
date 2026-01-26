@@ -1,68 +1,97 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import api from "../services/api";
+import { useNavigate } from "react-router-dom";
 
 export default function Login() {
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
-    const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
 
-    const handleLogin = async () => {
-        if (!email || !password) {
-        alert("Email and password required");
-        return;
-        }
+    const [isRegister, setIsRegister] = useState(false);
+    const [form, setForm] = useState({
+        username: "",
+        email: "",
+        password: "",
+    });
+
+    const handleChange = (e) => {
+        setForm({ ...form, [e.target.name]: e.target.value });
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
 
         try {
-        setLoading(true);
-        const res = await api.post("/auth/login", { email, password });
-        console.log("LOGIN RESPONSE:", res.data);
+        if (isRegister) {
+            // ✅ REGISTER
+            await api.post("/auth/register", form);
+            alert("Registration successful. Please login.");
+            setIsRegister(false);
+        } else {
+            // ✅ LOGIN
+            const res = await api.post("/auth/login", {
+            email: form.email,
+            password: form.password,
+            });
 
-        localStorage.setItem("token", res.data.access_token);
-        navigate("/"); // go to home
+            localStorage.setItem("token", res.data.access_token);
+            navigate("/");
+        }
         } catch (err) {
-        alert("Invalid credentials");
-        } finally {
-        setLoading(false);
+        alert(err.response?.data?.msg || "Something went wrong");
         }
     };
 
     return (
-        <div className="min-h-screen bg-black flex items-center justify-center text-white">
-        <div className="w-full max-w-sm bg-gray-900 p-8 rounded-xl shadow-lg">
-            <h1 className="text-3xl font-bold text-green-400 text-center mb-6">
-            🎵 Music App
-            </h1>
+        <div className="min-h-screen flex items-center justify-center bg-gray-100">
+        <form
+            onSubmit={handleSubmit}
+            className="bg-white p-6 rounded shadow-md w-80"
+        >
+            <h2 className="text-xl font-bold mb-4 text-center">
+            {isRegister ? "Register" : "Login"}
+            </h2>
+
+            {isRegister && (
+            <input
+                type="text"
+                name="username"
+                placeholder="Username"
+                onChange={handleChange}
+                className="w-full p-2 mb-3 border rounded"
+                required
+            />
+            )}
 
             <input
             type="email"
+            name="email"
             placeholder="Email"
-            className="w-full p-3 mb-4 rounded bg-gray-800 outline-none"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            onChange={handleChange}
+            className="w-full p-2 mb-3 border rounded"
+            required
             />
 
             <input
             type="password"
+            name="password"
             placeholder="Password"
-            className="w-full p-3 mb-6 rounded bg-gray-800 outline-none"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            onChange={handleChange}
+            className="w-full p-2 mb-3 border rounded"
+            required
             />
 
-            <button
-            onClick={handleLogin}
-            disabled={loading}
-            className="w-full bg-green-500 text-black py-3 rounded font-semibold hover:bg-green-400 transition"
-            >
-            {loading ? "Logging in..." : "Log In"}
+            <button className="w-full bg-black text-white p-2 rounded">
+            {isRegister ? "Register" : "Login"}
             </button>
 
-            <p className="text-gray-400 text-sm text-center mt-6">
-            AI-powered music & podcast streaming
+            <p
+            className="text-sm mt-3 text-center cursor-pointer text-blue-600"
+            onClick={() => setIsRegister(!isRegister)}
+            >
+            {isRegister
+                ? "Already have an account? Login"
+                : "New user? Register"}
             </p>
-        </div>
+        </form>
         </div>
     );
-}  
+}
