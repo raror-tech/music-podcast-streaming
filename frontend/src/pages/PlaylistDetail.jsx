@@ -40,7 +40,7 @@ export default function PlaylistDetail() {
 
   // ➕ ADD SONGS → SEARCH PAGE
   const goToAddSongs = () => {
-    navigate(`/music?playlistId=${id}`);
+    navigate(`/search?playlistId=${id}`);
   };
 
   if (loading) {
